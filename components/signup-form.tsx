@@ -78,12 +78,9 @@ export function SignupForm({
       {...props}
     >
       <FieldGroup>
-        <div className="flex flex-col items-center gap-1 text-center">
-          <h1 className="text-2xl font-bold">Create your account</h1>
-          <p className="text-muted-foreground text-sm text-balance">
-            Fill in the form below to create your account
-          </p>
-        </div>
+        <h1 className="text-2xl font-bold pb-4 text-center w-full">
+          Create your account
+        </h1>
         <Field>
           <FieldLabel htmlFor="name">Full Name</FieldLabel>
           <Input
@@ -127,7 +124,7 @@ export function SignupForm({
             {isSubmitting ? "Creating account..." : "Create Account"}
           </Button>
         </Field>
-        <FieldSeparator>Or continue with</FieldSeparator>
+        <FieldSeparator>Or</FieldSeparator>
         <Field>
           <Button
             variant="outline"

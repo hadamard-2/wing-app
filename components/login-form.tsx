@@ -67,12 +67,7 @@ export function LoginForm({
       {...props}
     >
       <FieldGroup>
-        <div className="flex flex-col items-center gap-1 text-center">
-          <h1 className="text-2xl font-bold">Login to your account</h1>
-          <p className="text-muted-foreground text-sm text-balance">
-            Enter your email below to login to your account
-          </p>
-        </div>
+        <h1 className="text-2xl font-bold pb-4 text-center w-full">Login to your account</h1>
         <Field>
           <FieldLabel htmlFor="email">Email</FieldLabel>
           <Input
@@ -97,7 +92,7 @@ export function LoginForm({
             {isSubmitting ? "Signing in..." : "Login"}
           </Button>
         </Field>
-        <FieldSeparator>Or continue with</FieldSeparator>
+        <FieldSeparator>Or</FieldSeparator>
         <Field>
           <Button
             variant="outline"
