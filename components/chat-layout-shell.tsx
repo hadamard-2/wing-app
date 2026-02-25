@@ -17,6 +17,7 @@ import {
   Settings,
   Sparkle,
 } from "lucide-react";
+import { signOut } from "@/lib/auth-client";
 import type { User } from "./chat-types";
 
 const MAIN_NAV_ITEMS = [
@@ -115,8 +116,15 @@ function SidebarItem({
   );
 }
 
-function LogoPopover({ onClose }: { onClose: () => void }) {
+function LogoPopover({
+  onClose,
+  currentUser,
+}: {
+  onClose: () => void;
+  currentUser: User;
+}) {
   const ref = useRef<HTMLDivElement>(null);
+  const [isSigningOut, setIsSigningOut] = useState(false);
 
   useEffect(() => {
     function handleClick(e: MouseEvent) {
@@ -128,16 +136,36 @@ function LogoPopover({ onClose }: { onClose: () => void }) {
     return () => document.removeEventListener("mousedown", handleClick);
   }, [onClose]);
 
+  async function handleSignOut() {
+    if (isSigningOut) return;
+    setIsSigningOut(true);
+    try {
+      await signOut({
+        fetchOptions: {
+          onSuccess: () => {
+            window.location.href = "/login";
+          },
+        },
+      });
+      onClose();
+    } finally {
+      setIsSigningOut(false);
+    }
+  }
+
+  const menuItemClass =
+    "flex items-center gap-3 w-full px-3 py-2.5 text-sm transition-colors rounded-lg text-gray-700 hover:bg-[#F3F3EE]";
+
   return (
     <div
       ref={ref}
-      className="absolute top-[72px] left-0 z-50 w-80 bg-white rounded-2xl shadow-lg border border-gray-100 py-3 animate-in fade-in slide-in-from-left-2 duration-150"
+      className="absolute top-[72px] left-0 z-50 w-80 bg-white rounded-2xl shadow-lg border border-gray-100 p-2 animate-in fade-in slide-in-from-left-2 duration-150"
     >
-      <button className="flex items-center gap-3 w-full px-5 py-2.5 text-gray-700 hover:bg-gray-50 transition-colors text-sm">
+      <button className={menuItemClass}>
         <ArrowLeft className="w-4 h-4" />
         Go back to dashboard
       </button>
-      <button className="flex items-center gap-3 w-full px-5 py-2.5 text-gray-700 hover:bg-gray-50 transition-colors text-sm">
+      <button className={menuItemClass}>
         <Pencil className="w-4 h-4" />
         Rename file
       </button>
@@ -145,8 +173,12 @@ function LogoPopover({ onClose }: { onClose: () => void }) {
       <div className="border-t-2 border-gray-100 m-2" />
 
       <div className="px-5 py-2">
-        <p className="font-semibold text-gray-900 text-sm">testing2</p>
-        <p className="text-xs text-gray-400">testing2@gmail.com</p>
+        <p className="font-semibold text-gray-900 text-sm">
+          {currentUser.name}
+        </p>
+        {currentUser.email ? (
+          <p className="text-xs text-gray-400">{currentUser.email}</p>
+        ) : null}
       </div>
 
       <div className="px-5 py-2">
@@ -170,20 +202,24 @@ function LogoPopover({ onClose }: { onClose: () => void }) {
 
       <div className="border-t-2 border-gray-100 m-2" />
 
-      <button className="flex items-center gap-3 w-full px-5 py-2.5 text-gray-700 hover:bg-gray-50 transition-colors text-sm">
+      <button className={menuItemClass}>
         <Gift className="w-4 h-4" />
         Win free credits
       </button>
-      <button className="flex items-center gap-3 w-full px-5 py-2.5 text-gray-700 hover:bg-gray-50 transition-colors text-sm">
+      <button className={menuItemClass}>
         <Settings className="w-4 h-4" />
         Theme Style
       </button>
 
       <div className="border-t-2 border-gray-100 m-2" />
 
-      <button className="flex items-center gap-3 w-full px-5 py-2.5 text-gray-700 hover:bg-gray-50 transition-colors text-sm">
+      <button
+        onClick={handleSignOut}
+        disabled={isSigningOut}
+        className={menuItemClass}
+      >
         <LogOut className="w-4 h-4" />
-        Log out
+        {isSigningOut ? "Logging out..." : "Log out"}
       </button>
     </div>
   );
@@ -212,7 +248,12 @@ export function ChatLayoutShell({
         >
           <img src="/wing-logo.svg" alt="Wing Logo" className="w-12 h-12" />
         </button>
-        {showLogoMenu && <LogoPopover onClose={() => setShowLogoMenu(false)} />}
+        {showLogoMenu && (
+          <LogoPopover
+            onClose={() => setShowLogoMenu(false)}
+            currentUser={currentUser}
+          />
+        )}
         <nav className="flex flex-col gap-2">
           {MAIN_NAV_ITEMS.map((item) => (
             <SidebarItem
