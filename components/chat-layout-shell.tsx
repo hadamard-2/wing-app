@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import { usePathname, useRouter } from "next/navigation";
 import {
   ArrowLeft,
   Bell,
@@ -97,12 +98,12 @@ function SidebarItem({
   id: string;
   icon: React.ElementType;
   activeTab: string;
-  onClick: (id: string) => void;
+  onClick?: (id: string) => void;
 }) {
   const isActive = activeTab === id;
   return (
     <button
-      onClick={() => onClick(id)}
+      onClick={() => onClick?.(id)}
       className={`w-12 h-12 rounded-lg flex items-center justify-center transition-colors ${
         isActive
           ? "bg-[#1E9A80]/10 border border-[#1E9A80]"
@@ -232,12 +233,27 @@ export function ChatLayoutShell({
   currentUser: User;
   children: React.ReactNode;
 }) {
-  const [activeTab, setActiveTab] = useState("message");
+  const pathname = usePathname();
+  const router = useRouter();
   const [showLogoMenu, setShowLogoMenu] = useState(false);
+
+  const activeTab = pathname.startsWith("/ai") ? "star" : "message";
+
   const activeNavItem =
     [...MAIN_NAV_ITEMS, STAR_NAV_ITEM].find((item) => item.id === activeTab) ||
     MAIN_NAV_ITEMS[1];
   const ActiveNavIcon = activeNavItem.icon;
+
+  function handleSidebarNavigation(id: string) {
+    if (id === "message") {
+      router.push("/");
+      return;
+    }
+
+    if (id === "star") {
+      router.push("/ai");
+    }
+  }
 
   return (
     <div className="h-screen w-full bg-[#F3F3EE] flex p-4 font-sans text-sm gap-4">
@@ -261,7 +277,7 @@ export function ChatLayoutShell({
               id={item.id}
               icon={item.icon}
               activeTab={activeTab}
-              onClick={setActiveTab}
+              onClick={handleSidebarNavigation}
             />
           ))}
         </nav>
@@ -270,7 +286,7 @@ export function ChatLayoutShell({
             id={STAR_NAV_ITEM.id}
             icon={STAR_NAV_ITEM.icon}
             activeTab={activeTab}
-            onClick={setActiveTab}
+            onClick={handleSidebarNavigation}
           />
           <div className="w-12 h-12 flex items-center justify-center">
             <Avatar
