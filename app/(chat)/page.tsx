@@ -13,6 +13,12 @@ export default async function Home() {
   }
 
   return (
-    <Chat currentUser={{ id: session.user.id, name: session.user.name }} />
+    <Chat
+      currentUser={{
+        id: session.user.id,
+        name: session.user.name,
+        image: session.user.image,
+      }}
+    />
   );
 }
