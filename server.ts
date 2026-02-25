@@ -3,6 +3,7 @@ import { Server as SocketIOServer } from "socket.io";
 import next from "next";
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
+import { setSocketServer } from "@/lib/socket-server";
 
 const dev = process.env.NODE_ENV !== "production";
 const app = next({ dev });
@@ -12,6 +13,7 @@ await app.prepare();
 
 const httpServer = createServer((req, res) => handle(req, res));
 const io = new SocketIOServer(httpServer);
+setSocketServer(io);
 
 io.use(async (socket, next) => {
   const cookie = socket.handshake.headers.cookie;

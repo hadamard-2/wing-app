@@ -26,6 +26,14 @@ import {
   Pencil,
   Gift,
   LogOut,
+  MessageCircle,
+  Archive,
+  Volume2,
+  CircleUser,
+  Upload,
+  X,
+  Trash2,
+  ChevronRight,
 } from "lucide-react";
 
 const MAIN_NAV_ITEMS = [
@@ -36,51 +44,67 @@ const MAIN_NAV_ITEMS = [
   { id: "image", icon: ImageIcon },
 ];
 
-const CHAT_MESSAGES = [
-  {
-    id: "1",
-    name: "Adrian Kurt",
-    time: "3 mins ago",
-    msg: "Thanks for the explanation!",
-    img: "12",
-    isRead: true,
-  },
-  {
-    id: "2",
-    name: "Yomi Immanuel",
-    time: "12 mins ago",
-    msg: "Let's do a quick call after lunch, I'll explai...",
-    img: "13",
-  },
-  {
-    id: "3",
-    name: "Bianca Nubia",
-    time: "32 mins ago",
-    msg: "anytime! my pleasure~",
-    img: "14",
-  },
-  {
-    id: "4",
-    name: "Zender Lowre",
-    time: "1 hour ago",
-    msg: "Okay cool, that make sense 👍",
-    img: "15",
-  },
-  {
-    id: "5",
-    name: "Palmer Dian",
-    time: "5 hour ago",
-    msg: "Thanks, Jonas! That helps 😅",
-    img: "16",
-  },
-  {
-    id: "6",
-    name: "Yuki Tanaka",
-    time: "12 hour ago",
-    msg: "Have you watch the new season of Danm...",
-    img: "17",
-  },
-];
+interface User {
+  id: string;
+  name: string;
+  email?: string;
+  image?: string | null;
+}
+
+function UserAvatar({
+  user,
+  size = "md",
+}: {
+  user: { name: string; image?: string | null };
+  size?: "sm" | "md";
+}) {
+  const sizeClass = size === "sm" ? "w-10 h-10 text-sm" : "w-12 h-12 text-lg";
+  if (user.image) {
+    return (
+      <img
+        src={user.image}
+        alt={user.name}
+        className={`${sizeClass} rounded-full object-cover shrink-0`}
+      />
+    );
+  }
+  return (
+    <div
+      className={`${sizeClass} rounded-full bg-[#1E9A80]/10 flex items-center justify-center text-[#1E9A80] font-semibold shrink-0`}
+    >
+      {user.name.charAt(0).toUpperCase()}
+    </div>
+  );
+}
+
+interface Message {
+  id: string;
+  content: string;
+  senderId: string;
+  conversationId: string;
+  createdAt: string;
+}
+
+interface ConversationPreview {
+  id: string;
+  user: User;
+  lastMessage: string | null;
+  lastMessageTime: string | null;
+  lastMessageSenderId: string | null;
+}
+
+interface ChatUIProps {
+  currentUser: User;
+  users: User[];
+  conversations: ConversationPreview[];
+  selectedUser: User | null;
+  messages: Message[];
+  input: string;
+  onInputChange: (value: string) => void;
+  onSendMessage: (e: React.FormEvent) => void;
+  onSelectUser: (user: User) => void;
+  onDeleteConversation: (conversationId: string) => void;
+}
 
 function IconButton({
   icon: Icon,
@@ -156,129 +180,77 @@ function SidebarItem({
   );
 }
 
-type ConversationMessage = {
-  id: string;
-  type: "received" | "sent";
-  texts: string[];
-  time: string;
-  isRead?: boolean;
-};
-
-const CONVERSATION_MESSAGES: ConversationMessage[] = [
-  {
-    id: "m1",
-    type: "received",
-    texts: [
-      "Hey, Dan",
-      "Can you help with with the last task on basecamp, please?",
-      "I'm little bit confused with the task.. 😅",
-    ],
-    time: "10:17 AM",
-  },
-  {
-    id: "m2",
-    type: "sent",
-    texts: ["it's done already, no worries!"],
-    time: "10:22 AM",
-    isRead: true,
-  },
-  {
-    id: "m3",
-    type: "received",
-    texts: ["what...", "Really?! Thank you so much! 😍"],
-    time: "10:32 AM",
-  },
-  {
-    id: "m4",
-    type: "sent",
-    texts: ["anytime! my pleasure~"],
-    time: "11:01 AM",
-    isRead: true,
-  },
-];
-
-function ReceivedMessage({ texts, time }: { texts: string[]; time: string }) {
+function ReceivedMessage({ text, time }: { text: string; time: string }) {
   return (
     <div className="flex flex-col gap-2 max-w-md">
-      {texts.map((text, i) => (
-        <div key={i} className="bg-white p-4 rounded-xl text-gray-800 w-fit">
-          {text}
-        </div>
-      ))}
+      <div className="bg-white p-4 rounded-xl text-gray-800 w-fit">{text}</div>
       <span className="text-xs text-gray-400 ml-1">{time}</span>
     </div>
   );
 }
 
-function SentMessage({
-  texts,
-  time,
-  isRead = false,
-}: {
-  texts: string[];
-  time: string;
-  isRead?: boolean;
-}) {
+function SentMessage({ text, time }: { text: string; time: string }) {
   return (
     <div className="flex flex-col gap-2 max-w-md self-end items-end">
-      {texts.map((text, i) => (
-        <div
-          key={i}
-          className="bg-[#F0FDF4] p-4 rounded-xl text-gray-800 w-fit"
-        >
-          {text}
-        </div>
-      ))}
+      <div className="bg-[#F0FDF4] p-4 rounded-xl text-gray-800 w-fit">
+        {text}
+      </div>
       <div className="flex items-center gap-1 mr-1">
-        <CheckCheck
-          className={`w-4 h-4 ${isRead ? "text-[#1E9A80]" : "text-gray-300"}`}
-        />
+        <CheckCheck className="w-4 h-4 text-[#1E9A80]" />
         <span className="text-xs text-gray-400">{time}</span>
       </div>
     </div>
   );
 }
 
+function formatRelativeTime(iso: string) {
+  const diff = Date.now() - new Date(iso).getTime();
+  const mins = Math.floor(diff / 60000);
+  if (mins < 1) return "Just now";
+  if (mins < 60) return `${mins} min ago`;
+  const hours = Math.floor(mins / 60);
+  if (hours < 24) return `${hours}h ago`;
+  const days = Math.floor(hours / 24);
+  if (days < 7) return `${days}d ago`;
+  return new Date(iso).toLocaleDateString();
+}
+
 function MessageListItem({
-  name,
-  time,
-  msg,
-  img,
+  user,
+  lastMessage,
+  lastMessageTime,
   isActive = false,
-  isRead = false,
   onClick,
+  onContextMenu,
 }: {
-  name: string;
-  time: string;
-  msg: string;
-  img: string;
+  user: User;
+  lastMessage?: string | null;
+  lastMessageTime?: string | null;
   isActive?: boolean;
-  isRead?: boolean;
   onClick?: () => void;
+  onContextMenu?: (e: React.MouseEvent) => void;
 }) {
   return (
     <div
       onClick={onClick}
+      onContextMenu={onContextMenu}
       className={`flex items-center p-3 rounded-2xl cursor-pointer transition-colors ${
         isActive ? "bg-[#F3F3EE]" : "hover:bg-gray-50"
       }`}
     >
-      <Avatar src={`https://i.pravatar.cc/150?img=${img}`} alt={name} />
+      <UserAvatar user={user} />
       <div className="flex-1 min-w-0 ml-3">
         <div className="flex justify-between items-center mb-1">
-          <h3 className="font-semibold text-gray-900 truncate">{name}</h3>
-          <span className="text-xs text-gray-400 whitespace-nowrap">
-            {time}
-          </span>
+          <h3 className="font-semibold text-gray-900 truncate">{user.name}</h3>
+          {lastMessageTime && (
+            <span className="text-xs text-gray-400 whitespace-nowrap ml-2">
+              {formatRelativeTime(lastMessageTime)}
+            </span>
+          )}
         </div>
-        <div className="flex justify-between items-center">
-          <p className="text-sm text-gray-500 truncate">{msg}</p>
-          <CheckCheck
-            className={`w-4 h-4 flex-shrink-0 ml-2 ${
-              isRead ? "text-[#1E9A80]" : "text-gray-300"
-            }`}
-          />
-        </div>
+        {lastMessage && (
+          <p className="text-sm text-gray-500 truncate">{lastMessage}</p>
+        )}
       </div>
     </div>
   );
@@ -358,17 +330,15 @@ function LogoPopover({ onClose }: { onClose: () => void }) {
   );
 }
 
-const NEW_MESSAGE_CONTACTS = [
-  { name: "Adrian Kurt", img: "12" },
-  { name: "Bianca Lofre", img: "14" },
-  { name: "Diana Sayu", img: "20" },
-  { name: "Palmer Dian", img: "16" },
-  { name: "Sam Kohler", img: "18" },
-  { name: "Yuki Tanaka", img: "17" },
-  { name: "Zender Lowre", img: "15" },
-];
-
-function NewMessagePopover({ onClose }: { onClose: () => void }) {
+function NewMessagePopover({
+  users,
+  onClose,
+  onSelectUser,
+}: {
+  users: User[];
+  onClose: () => void;
+  onSelectUser: (user: User) => void;
+}) {
   const ref = useRef<HTMLDivElement>(null);
   const [search, setSearch] = useState("");
 
@@ -382,9 +352,13 @@ function NewMessagePopover({ onClose }: { onClose: () => void }) {
     return () => document.removeEventListener("mousedown", handleClick);
   }, [onClose]);
 
-  const filtered = NEW_MESSAGE_CONTACTS.filter((c) =>
-    c.name.toLowerCase().includes(search.toLowerCase())
-  );
+  const filtered = users.filter((u) => {
+    const q = search.toLowerCase();
+    return (
+      u.name.toLowerCase().includes(q) ||
+      (u.email && u.email.toLowerCase().includes(q))
+    );
+  });
 
   return (
     <div
@@ -407,18 +381,18 @@ function NewMessagePopover({ onClose }: { onClose: () => void }) {
         </div>
       </div>
       <div className="flex flex-col">
-        {filtered.map((contact) => (
+        {filtered.map((user) => (
           <button
-            key={contact.name}
+            key={user.id}
+            onClick={() => {
+              onSelectUser(user);
+              onClose();
+            }}
             className="flex items-center gap-3 px-5 py-2.5 hover:bg-gray-50 transition-colors cursor-pointer"
           >
-            <Avatar
-              src={`https://i.pravatar.cc/150?img=${contact.img}`}
-              alt={contact.name}
-              size="sm"
-            />
+            <UserAvatar user={user} size="sm" />
             <span className="text-sm font-medium text-gray-800">
-              {contact.name}
+              {user.name}
             </span>
           </button>
         ))}
@@ -427,11 +401,122 @@ function NewMessagePopover({ onClose }: { onClose: () => void }) {
   );
 }
 
-export function ChatUI() {
+function ConversationContextMenu({
+  x,
+  y,
+  onClose,
+  onDelete,
+}: {
+  x: number;
+  y: number;
+  onClose: () => void;
+  onDelete: () => void;
+}) {
+  const ref = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    function handleClick(e: MouseEvent) {
+      if (ref.current && !ref.current.contains(e.target as Node)) {
+        onClose();
+      }
+    }
+    function handleContextMenu(e: MouseEvent) {
+      if (ref.current && !ref.current.contains(e.target as Node)) {
+        onClose();
+      }
+    }
+    document.addEventListener("mousedown", handleClick);
+    document.addEventListener("contextmenu", handleContextMenu);
+    return () => {
+      document.removeEventListener("mousedown", handleClick);
+      document.removeEventListener("contextmenu", handleContextMenu);
+    };
+  }, [onClose]);
+
+  const items = [
+    { icon: MessageCircle, label: "Mark as unread" },
+    { icon: Archive, label: "Archive" },
+    { icon: Volume2, label: "Mute", hasSubmenu: true },
+    { icon: CircleUser, label: "Contact info" },
+    { icon: Upload, label: "Export chat" },
+    { icon: X, label: "Clear chat" },
+    { icon: Trash2, label: "Delete chat", danger: true, action: onDelete },
+  ];
+
+  return (
+    <div
+      ref={ref}
+      className="fixed z-[100] bg-white rounded-2xl shadow-lg border border-gray-100 p-2 w-56 animate-in fade-in zoom-in-95 duration-100"
+      style={{ top: y, left: x }}
+    >
+      {items.map((item) => (
+        <button
+          key={item.label}
+          onClick={() => {
+            item.action?.();
+            onClose();
+          }}
+          className={`flex items-center gap-3 w-full px-3 py-2.5 text-sm transition-colors rounded-lg ${
+            item.danger
+              ? "text-red-500 hover:bg-red-50"
+              : "text-gray-700 hover:bg-[#F3F3EE]"
+          }`}
+        >
+          <item.icon className="w-4 h-4" />
+          <span className="flex-1 text-left">{item.label}</span>
+          {item.hasSubmenu && (
+            <ChevronRight className="w-4 h-4 text-gray-400" />
+          )}
+        </button>
+      ))}
+    </div>
+  );
+}
+
+export function ChatUI({
+  currentUser,
+  users,
+  conversations,
+  selectedUser,
+  messages,
+  input,
+  onInputChange,
+  onSendMessage,
+  onSelectUser,
+  onDeleteConversation,
+}: ChatUIProps) {
   const [activeTab, setActiveTab] = useState("message");
-  const [activeMessageId, setActiveMessageId] = useState(CHAT_MESSAGES[0].id);
   const [showLogoMenu, setShowLogoMenu] = useState(false);
   const [showNewMessage, setShowNewMessage] = useState(false);
+  const [conversationSearch, setConversationSearch] = useState("");
+  const messagesEndRef = useRef<HTMLDivElement>(null);
+  const [contextMenu, setContextMenu] = useState<{
+    x: number;
+    y: number;
+    conversationId: string;
+  } | null>(null);
+
+  function handleConversationContextMenu(
+    e: React.MouseEvent,
+    conversationId: string
+  ) {
+    e.preventDefault();
+    setContextMenu({ x: e.clientX, y: e.clientY, conversationId });
+  }
+
+  const filteredConversations = conversationSearch
+    ? conversations.filter((c) => {
+        const q = conversationSearch.toLowerCase();
+        return (
+          c.user.name.toLowerCase().includes(q) ||
+          (c.user.email && c.user.email.toLowerCase().includes(q))
+        );
+      })
+    : conversations;
+
+  useEffect(() => {
+    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+  }, [messages]);
 
   return (
     <div className="h-screen w-full bg-[#F3F3EE] flex p-4 font-sans text-sm gap-4">
@@ -465,12 +550,12 @@ export function ChatUI() {
             onClick={setActiveTab}
           />
           <div className="w-12 h-12 flex items-center justify-center">
-           <Avatar
-             src="https://i.pravatar.cc/150?img=5"
-             alt="Profile"
-             size="sm"
-             className="border-2 border-white shadow-sm"
-           />
+            <Avatar
+              src="https://i.pravatar.cc/150?img=5"
+              alt="Profile"
+              size="sm"
+              className="border-2 border-white shadow-sm"
+            />
           </div>
         </div>
       </aside>
@@ -530,7 +615,11 @@ export function ChatUI() {
                 </button>
               </div>
               {showNewMessage && (
-                <NewMessagePopover onClose={() => setShowNewMessage(false)} />
+                <NewMessagePopover
+                  users={users}
+                  onClose={() => setShowNewMessage(false)}
+                  onSelectUser={onSelectUser}
+                />
               )}
               <div className="flex gap-2">
                 <div className="relative flex-1 flex items-center h-10 rounded-lg bg-gray-50 border border-gray-100 px-3">
@@ -538,20 +627,27 @@ export function ChatUI() {
                   <input
                     type="text"
                     placeholder="Search in message"
+                    value={conversationSearch}
+                    onChange={(e) => setConversationSearch(e.target.value)}
                     className="flex-1 bg-transparent outline-none text-gray-700 placeholder-gray-400 text-sm"
                   />
                 </div>
-                <IconButton icon={Filter} className="text-gray-500" />
+                <IconButton icon={Filter} />
               </div>
             </div>
 
             <div className="flex-1 overflow-y-auto px-4 pb-4 flex flex-col gap-1">
-              {CHAT_MESSAGES.map((chat) => (
+              {filteredConversations.map((conv) => (
                 <MessageListItem
-                  key={chat.id}
-                  {...chat}
-                  isActive={activeMessageId === chat.id}
-                  onClick={() => setActiveMessageId(chat.id)}
+                  key={conv.id}
+                  user={conv.user}
+                  lastMessage={conv.lastMessage}
+                  lastMessageTime={conv.lastMessageTime}
+                  isActive={selectedUser?.id === conv.user.id}
+                  onClick={() => onSelectUser(conv.user)}
+                  onContextMenu={(e) =>
+                    handleConversationContextMenu(e, conv.id)
+                  }
                 />
               ))}
             </div>
@@ -559,80 +655,98 @@ export function ChatUI() {
 
           {/* Chat Area Island */}
           <section className="flex-1 bg-white rounded-2xl flex flex-col overflow-hidden border border-gray-100">
-            {/* Chat Header */}
-            <div className="px-6 py-6 flex items-center justify-between shrink-0">
-              <div className="flex items-center gap-4">
-                <Avatar
-                  src="https://i.pravatar.cc/150?img=11"
-                  alt="Daniel CH"
-                />
-                <div>
-                  <h2 className="font-bold text-gray-900 text-lg">Daniel CH</h2>
-                  <div className="flex items-center gap-1.5">
-                    <div className="w-2 h-2 rounded-full bg-[#1E9A80]"></div>
-                    <span className="text-xs text-[#1E9A80] font-medium">
-                      Online
-                    </span>
+            {selectedUser ? (
+              <>
+                {/* Chat Header */}
+                <div className="px-6 py-6 flex items-center justify-between shrink-0">
+                  <div className="flex items-center gap-4">
+                    <UserAvatar user={selectedUser} />
+                    <div>
+                      <h2 className="font-bold text-gray-900 text-lg">
+                        {selectedUser.name}
+                      </h2>
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-3">
+                    <IconButton icon={Search} />
+                    <IconButton icon={Phone} />
+                    <IconButton icon={Video} />
+                    <IconButton icon={MoreHorizontal} />
                   </div>
                 </div>
-              </div>
-              <div className="flex items-center gap-3">
-                <IconButton icon={Search} />
-                <IconButton icon={Phone} />
-                <IconButton icon={Video} />
-                <IconButton icon={MoreHorizontal} />
-              </div>
-            </div>
 
-            {/* Messages Sub-Island */}
-            <div className="flex-1 overflow-y-auto mx-4 p-4 flex flex-col gap-6 bg-[#F3F3EE] rounded-2xl">
-              <div className="flex justify-center my-4">
-                <span className="bg-white px-4 py-1.5 rounded-full text-xs font-medium text-gray-500 border border-gray-100">
-                  Today
-                </span>
-              </div>
+                {/* Messages Sub-Island */}
+                <div className="flex-1 overflow-y-auto mx-4 p-4 flex flex-col gap-6 bg-[#F3F3EE] rounded-2xl">
+                  {messages.map((msg) =>
+                    msg.senderId === currentUser.id ? (
+                      <SentMessage
+                        key={msg.id}
+                        text={msg.content}
+                        time={new Date(msg.createdAt).toLocaleTimeString([], {
+                          hour: "2-digit",
+                          minute: "2-digit",
+                        })}
+                      />
+                    ) : (
+                      <ReceivedMessage
+                        key={msg.id}
+                        text={msg.content}
+                        time={new Date(msg.createdAt).toLocaleTimeString([], {
+                          hour: "2-digit",
+                          minute: "2-digit",
+                        })}
+                      />
+                    )
+                  )}
+                  <div ref={messagesEndRef} />
+                </div>
 
-              {CONVERSATION_MESSAGES.map((msg) =>
-                msg.type === "received" ? (
-                  <ReceivedMessage
-                    key={msg.id}
-                    texts={msg.texts}
-                    time={msg.time}
+                {/* Input Sub-Island */}
+                <form
+                  onSubmit={onSendMessage}
+                  className="mx-4 mt-2 mb-4 p-2 border-2 border-[#F3F3EE] rounded-full shrink-0 flex items-center gap-3"
+                >
+                  <input
+                    type="text"
+                    placeholder="Type any message..."
+                    value={input}
+                    onChange={(e) => onInputChange(e.target.value)}
+                    className="flex-1 bg-transparent outline-none text-gray-700 placeholder-gray-400 px-2"
                   />
-                ) : (
-                  <SentMessage
-                    key={msg.id}
-                    texts={msg.texts}
-                    time={msg.time}
-                    isRead={msg.isRead}
-                  />
-                )
-              )}
-            </div>
-
-            {/* Input Sub-Island */}
-            <div className="mx-4 mt-2 mb-4 p-2 border-2 border-[#F3F3EE] rounded-full shrink-0 flex items-center gap-3">
-              <input
-                type="text"
-                placeholder="Type any message..."
-                className="flex-1 bg-transparent outline-none text-gray-700 placeholder-gray-400 px-2"
-              />
-              <button className="text-gray p-2">
-                <Mic className="w-5 h-5" />
-              </button>
-              <button className="text-gray p-2">
-                <Smile className="w-5 h-5" />
-              </button>
-              <button className="text-gray p-2">
-                <Paperclip className="w-5 h-5" />
-              </button>
-              <button className="w-10 h-10 rounded-full bg-[#1E9A80] flex items-center justify-center text-white hover:bg-[#17826b] transition-colors">
-                <Send className="w-4 h-4" />
-              </button>
-            </div>
+                  <button type="button" className="text-gray p-2">
+                    <Mic className="w-5 h-5" />
+                  </button>
+                  <button type="button" className="text-gray p-2">
+                    <Smile className="w-5 h-5" />
+                  </button>
+                  <button type="button" className="text-gray p-2">
+                    <Paperclip className="w-5 h-5" />
+                  </button>
+                  <button
+                    type="submit"
+                    className="w-10 h-10 rounded-full bg-[#1E9A80] flex items-center justify-center text-white hover:bg-[#17826b] transition-colors"
+                  >
+                    <Send className="w-4 h-4" />
+                  </button>
+                </form>
+              </>
+            ) : (
+              <div className="flex-1 flex items-center justify-center text-gray-400">
+                Select a user to start chatting
+              </div>
+            )}
           </section>
         </main>
       </div>
+
+      {contextMenu && (
+        <ConversationContextMenu
+          x={contextMenu.x}
+          y={contextMenu.y}
+          onClose={() => setContextMenu(null)}
+          onDelete={() => onDeleteConversation(contextMenu.conversationId)}
+        />
+      )}
     </div>
   );
 }
