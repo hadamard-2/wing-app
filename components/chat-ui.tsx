@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useRef, useEffect } from "react";
 import {
   Search,
   Bell,
@@ -22,6 +22,10 @@ import {
   Send,
   Edit,
   Sparkle,
+  ArrowLeft,
+  Pencil,
+  Gift,
+  LogOut,
 } from "lucide-react";
 
 const MAIN_NAV_ITEMS = [
@@ -280,17 +284,168 @@ function MessageListItem({
   );
 }
 
+function LogoPopover({ onClose }: { onClose: () => void }) {
+  const ref = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    function handleClick(e: MouseEvent) {
+      if (ref.current && !ref.current.contains(e.target as Node)) {
+        onClose();
+      }
+    }
+    document.addEventListener("mousedown", handleClick);
+    return () => document.removeEventListener("mousedown", handleClick);
+  }, [onClose]);
+
+  return (
+    <div
+      ref={ref}
+      className="absolute top-[72px] left-0 z-50 w-80 bg-white rounded-2xl shadow-lg border border-gray-100 py-3 animate-in fade-in slide-in-from-left-2 duration-150"
+    >
+      <button className="flex items-center gap-3 w-full px-5 py-2.5 text-gray-700 hover:bg-gray-50 transition-colors text-sm">
+        <ArrowLeft className="w-4 h-4" />
+        Go back to dashboard
+      </button>
+      <button className="flex items-center gap-3 w-full px-5 py-2.5 text-gray-700 hover:bg-gray-50 transition-colors text-sm">
+        <Pencil className="w-4 h-4" />
+        Rename file
+      </button>
+
+      <div className="border-t-2 border-gray-100 m-2" />
+
+      <div className="px-5 py-2">
+        <p className="font-semibold text-gray-900 text-sm">testing2</p>
+        <p className="text-xs text-gray-400">testing2@gmail.com</p>
+      </div>
+
+      <div className="px-5 py-2">
+        <div className="flex justify-between text-xs text-gray-500 my-4">
+          <span>
+            Credits <span className="font-semibold text-gray-800">20 left</span>
+          </span>
+          <span>
+            Renews in{" "}
+            <span className="font-semibold text-gray-800">6h 24m</span>
+          </span>
+        </div>
+        <div className="w-full h-2 bg-gray-100 rounded-full overflow-hidden">
+          <div className="h-full bg-[#1E9A80] rounded-full w-4/5" />
+        </div>
+        <div className="flex justify-between text-xs mt-1.5">
+          <span className="text-gray-500">5 of 25 used today</span>
+          <span className="text-[#1E9A80] font-medium">+25 tomorrow</span>
+        </div>
+      </div>
+
+      <div className="border-t-2 border-gray-100 m-2" />
+
+      <button className="flex items-center gap-3 w-full px-5 py-2.5 text-gray-700 hover:bg-gray-50 transition-colors text-sm">
+        <Gift className="w-4 h-4" />
+        Win free credits
+      </button>
+      <button className="flex items-center gap-3 w-full px-5 py-2.5 text-gray-700 hover:bg-gray-50 transition-colors text-sm">
+        <Settings className="w-4 h-4" />
+        Theme Style
+      </button>
+
+      <div className="border-t-2 border-gray-100 m-2" />
+
+      <button className="flex items-center gap-3 w-full px-5 py-2.5 text-gray-700 hover:bg-gray-50 transition-colors text-sm">
+        <LogOut className="w-4 h-4" />
+        Log out
+      </button>
+    </div>
+  );
+}
+
+const NEW_MESSAGE_CONTACTS = [
+  { name: "Adrian Kurt", img: "12" },
+  { name: "Bianca Lofre", img: "14" },
+  { name: "Diana Sayu", img: "20" },
+  { name: "Palmer Dian", img: "16" },
+  { name: "Sam Kohler", img: "18" },
+  { name: "Yuki Tanaka", img: "17" },
+  { name: "Zender Lowre", img: "15" },
+];
+
+function NewMessagePopover({ onClose }: { onClose: () => void }) {
+  const ref = useRef<HTMLDivElement>(null);
+  const [search, setSearch] = useState("");
+
+  useEffect(() => {
+    function handleClick(e: MouseEvent) {
+      if (ref.current && !ref.current.contains(e.target as Node)) {
+        onClose();
+      }
+    }
+    document.addEventListener("mousedown", handleClick);
+    return () => document.removeEventListener("mousedown", handleClick);
+  }, [onClose]);
+
+  const filtered = NEW_MESSAGE_CONTACTS.filter((c) =>
+    c.name.toLowerCase().includes(search.toLowerCase())
+  );
+
+  return (
+    <div
+      ref={ref}
+      className="absolute top-16 left-8 right-6 z-50 bg-white rounded-2xl shadow-md border border-gray-200 py-4 mt-2"
+    >
+      <h3 className="font-semibold text-gray-900 text-lg px-5 mb-6">
+        New Message
+      </h3>
+      <div className="px-5 mb-3">
+        <div className="flex items-center h-10 rounded-lg bg-gray-50 border border-gray-100 px-3">
+          <Search className="w-4 h-4 text-gray-400 mr-2" />
+          <input
+            type="text"
+            placeholder="Search name or email"
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            className="flex-1 bg-transparent outline-none text-gray-700 placeholder-gray-400 text-sm"
+          />
+        </div>
+      </div>
+      <div className="flex flex-col">
+        {filtered.map((contact) => (
+          <button
+            key={contact.name}
+            className="flex items-center gap-3 px-5 py-2.5 hover:bg-gray-50 transition-colors cursor-pointer"
+          >
+            <Avatar
+              src={`https://i.pravatar.cc/150?img=${contact.img}`}
+              alt={contact.name}
+              size="sm"
+            />
+            <span className="text-sm font-medium text-gray-800">
+              {contact.name}
+            </span>
+          </button>
+        ))}
+      </div>
+    </div>
+  );
+}
+
 export function ChatUI() {
   const [activeTab, setActiveTab] = useState("message");
   const [activeMessageId, setActiveMessageId] = useState(CHAT_MESSAGES[0].id);
+  const [showLogoMenu, setShowLogoMenu] = useState(false);
+  const [showNewMessage, setShowNewMessage] = useState(false);
 
   return (
     <div className="h-screen w-full bg-[#F3F3EE] flex p-4 font-sans text-sm gap-4">
       {/* Left Sidebar (Full Height) */}
-      <aside className="w-16 flex flex-col items-center h-full">
-        <div className="w-12 h-12 flex items-center justify-center mt-3 mb-10">
+      <aside className="w-16 flex flex-col items-center h-full relative">
+        <button
+          onClick={() => setShowLogoMenu((v) => !v)}
+          className="w-12 h-12 flex items-center justify-center mt-3 mb-10 cursor-pointer"
+        >
           <img src="/wing-logo.svg" alt="Wing Logo" className="w-12 h-12" />
-        </div>
+        </button>
+        {showLogoMenu && (
+          <LogoPopover onClose={() => setShowLogoMenu(false)} />
+        )}
         <nav className="flex flex-col gap-2">
           {MAIN_NAV_ITEMS.map((item) => (
             <SidebarItem
@@ -363,14 +518,20 @@ export function ChatUI() {
         <main className="flex-1 flex gap-4 overflow-hidden">
           {/* Message List */}
           <section className="w-[420px] bg-white rounded-2xl flex flex-col overflow-hidden border border-gray-100">
-            <div className="p-6 pb-4">
+            <div className="p-6 pb-4 relative">
               <div className="flex items-center justify-between mb-6">
                 <h2 className="text-xl font-bold text-gray-800">All Message</h2>
-                <button className="bg-[#1E9A80] text-white px-4 py-2 rounded-lg flex items-center gap-2 text-sm font-medium hover:bg-[#17826b] transition-colors">
+                <button
+                  onClick={() => setShowNewMessage((v) => !v)}
+                  className="bg-[#1E9A80] text-white px-4 py-2 rounded-lg flex items-center gap-2 text-sm font-medium hover:bg-[#17826b] transition-colors"
+                >
                   <Edit className="w-4 h-4" />
                   New Message
                 </button>
               </div>
+              {showNewMessage && (
+                <NewMessagePopover onClose={() => setShowNewMessage(false)} />
+              )}
               <div className="flex gap-2">
                 <div className="relative flex-1 flex items-center h-10 rounded-lg bg-gray-50 border border-gray-100 px-3">
                   <Search className="w-4 h-4 text-gray-400 mr-2" />
