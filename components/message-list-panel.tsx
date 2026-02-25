@@ -147,7 +147,7 @@ function NewMessagePopover({
   return (
     <div
       ref={ref}
-      className="absolute top-16 left-8 right-6 z-50 bg-white rounded-2xl shadow-md border border-gray-200 py-4 mt-2"
+      className="absolute top-16 left-8 right-6 z-50 bg-white rounded-2xl shadow-md border border-gray-200 pt-4 pb-2 mt-2"
     >
       <h3 className="font-semibold text-gray-900 text-lg px-5 mb-6">
         New Message
@@ -172,7 +172,7 @@ function NewMessagePopover({
               onSelectUser(user);
               onClose();
             }}
-            className="flex items-center gap-3 px-5 py-2.5 hover:bg-gray-50 transition-colors cursor-pointer"
+            className="flex items-center gap-3 mx-2 px-3 py-2.5 rounded-lg text-gray-700 hover:bg-[#F3F3EE] transition-colors cursor-pointer"
           >
             <UserAvatar user={user} size="sm" />
             <span className="text-sm font-medium text-gray-800">

@@ -14,19 +14,20 @@ datasource db {
 }
 
 model User {
-  id            String    @id
+  id            String   @id
   name          String
   email         String
-  emailVerified Boolean   @default(false)
+  emailVerified Boolean  @default(false)
   image         String?
-  createdAt     DateTime  @default(now())
-  updatedAt     DateTime  @updatedAt
-  
-  sessions      Session[]
-  accounts      Account[]
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  sessions Session[]
+  accounts Account[]
 
   participants    ConversationParticipant[]
   sentMessages    Message[]
+  aiConversations AIConversation[]
 
   @@unique([email])
   @@map("user")
@@ -96,7 +97,7 @@ model Conversation {
 }
 
 model ConversationParticipant {
-  id             String       @id @default(cuid())
+  id             String @id @default(cuid())
   userId         String
   conversationId String
 
@@ -118,4 +119,31 @@ model Message {
   conversation Conversation @relation(fields: [conversationId], references: [id])
 
   @@map("message")
+}
+
+model AIConversation {
+  id        String   @id @default(cuid())
+  title     String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  userId    String
+
+  user     User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+  messages AIMessage[]
+
+  @@index([userId])
+  @@map("ai_conversation")
+}
+
+model AIMessage {
+  id               String   @id @default(cuid())
+  role             String
+  content          String
+  createdAt        DateTime @default(now())
+  aiConversationId String
+
+  conversation AIConversation @relation(fields: [aiConversationId], references: [id], onDelete: Cascade)
+
+  @@index([aiConversationId])
+  @@map("ai_message")
 }
